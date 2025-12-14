@@ -14,14 +14,14 @@ public_users.post("/register", (req, res) => {
         // Check if the user does not already exist
         if (isValid(username)) {
             // Add the new user to the users array
-            users.push({"username": username, "password": password});
-            return res.status(200).json({message: "User successfully registered. Now you can login"});
+            users.push({ "username": username, "password": password });
+            return res.status(200).json({ message: "User successfully registered. Now you can login" });
         } else {
-            return res.status(404).json({message: "User already exists!"});
+            return res.status(404).json({ message: "User already exists!" });
         }
     }
     // Return error if username or password is missing
-    return res.status(404).json({message: "Unable to register user."});
+    return res.status(404).json({ message: "Unable to register user." });
 });
 
 // Get the book list available in the shop
@@ -64,6 +64,66 @@ public_users.get('/title/:title', function (req, res) {
 public_users.get('/review/:isbn', function (req, res) {
     //Write your code here
     return res.status(200).send(JSON.stringify(books[req.params.isbn].reviews));
+});
+
+// Async getting all books
+public_users.get("/async/books", async function (req, res) {
+    try {
+        const response = await axios.get("http://localhost:5000/");
+        return res.status(200).json(response.data);
+    } catch (error) {
+        return res
+            .status(500)
+            .json({ message: "Error fetching book list", error: error.message });
+    }
+});
+
+// Async getting books by isbn
+public_users.get("/async/isbn/:isbn", async (req, res) => {
+    const isbn = req.params.isbn;
+
+    try {
+        const response = await axios.get(`http://localhost:5000/isbn/${isbn}`);
+
+        return res.status(200).send(JSON.stringify(response.data, null, 2));
+    } catch (error) {
+        return res.status(500).json({
+            message: "Error fetching book details",
+            error: error.message,
+        });
+    }
+});
+
+//Async getting books by author
+public_users.get("/async/:author", async (req, res) => {
+    const author = req.params.author;
+
+    try {
+        const response = await axios.get(`http://localhost:5000/author/${author}`);
+
+        return res.status(200).send(JSON.stringify(response.data, null, 2));
+    } catch (error) {
+        return res.status(500).json({
+            message: "Error fetching book details",
+            error: error.message,
+        });
+    }
+});
+
+// Async getting books by title
+public_users.get("/async/:title", async (req, res) => {
+    const title = req.params.title;
+
+    try {
+        const response = await axios.get(`http://localhost:5000/title/${title}`);
+
+        return res.status(200).send(JSON.stringify(response.data, null, 2));
+    } catch (error) {
+        return res.status(500).json({
+            message: "Error fetching book details",
+            error: error.message,
+        });
+    }
 });
 
 module.exports.general = public_users;
